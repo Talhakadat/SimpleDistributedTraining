@@ -15,7 +15,7 @@ def ddp_setup(rank, world_size):
     os.environ['MASTER_ADDR'] = 'localhost'
     os.environ['MASTER_PORT'] = '12355'
     init_process_group(backend='nccl', rank=rank, world_size=world_size)
-    torch.cuda.set_device(rank)  # Her process için GPU ayarla
+    torch.cuda.set_device(rank)
 
 
 class Trainer:
@@ -23,10 +23,10 @@ class Trainer:
                  dataloader: torch.utils.data.DataLoader,
                  model: torch.nn.Module,
                  optimizer: torch.optim.Optimizer,
-                 save_every: int  # bool yerine int olmalı
+                 save_every: int
                  ):
         self.dataloader = dataloader
-        self.model = DDP(model.to(gpu_id), device_ids=[gpu_id])  # Modeli GPU'ya taşı
+        self.model = DDP(model.to(gpu_id), device_ids=[gpu_id])
         self.criterion = torch.nn.CrossEntropyLoss()
         self.gpu_id = gpu_id
         self.optimizer = optimizer
@@ -41,7 +41,7 @@ class Trainer:
 
     def _save_checkpoint(self, epoch):
         ckp = self.model.module.state_dict()
-        PATH = f"checkpoint_epoch_{epoch}.pt"  # Daha açıklayıcı dosya adı
+        PATH = f"checkpoint_epoch_{epoch}.pt"
         torch.save(ckp, PATH)
         print(f"Epoch {epoch} | Training checkpoint saved at {PATH}")
 
@@ -71,43 +71,42 @@ class Trainer:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        return loss.item()  # Loss değerini return et
+        return loss.item()
 
 
 def get_model_optimizer():
-    # Food101 için uygun bir model oluştur
     model = torch.nn.Sequential(
         torch.nn.Flatten(),
-        torch.nn.Linear(3 * 224 * 224, 512),  # Food101 için 224x224 RGB görüntüler
+        torch.nn.Linear(3 * 224 * 224, 512),
         torch.nn.ReLU(),
         torch.nn.Dropout(0.2),
         torch.nn.Linear(512, 256),
         torch.nn.ReLU(),
         torch.nn.Dropout(0.2),
-        torch.nn.Linear(256, 101)  # Food101'de 101 sınıf var
+        torch.nn.Linear(256, 101)
     )
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)  # Adam optimizer daha iyi
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     return model, optimizer
 
 
 def main(rank, world_size, save_every):
     ddp_setup(rank, world_size)
 
-    # Transform pipeline'ını düzelt
+
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),  # Görüntüleri yeniden boyutlandır
+        transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # ImageNet normalizasyonu
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
     try:
         dataset_train = Food101(root='./data', split='train', transform=transform, download=True)
         dataloader = DataLoader(
             dataset_train,
-            batch_size=16,  # Daha küçük batch size bellek için
+            batch_size=16,
             shuffle=False,
             sampler=DistributedSampler(dataset_train),
-            num_workers=2,  # Daha hızlı veri yükleme
+            num_workers=2,
             pin_memory=True
         )
 
@@ -119,7 +118,7 @@ def main(rank, world_size, save_every):
             optimizer=optimizer,
             save_every=save_every
         )
-        trainer.train(max_epoch=10)  # Test için daha az epoch
+        trainer.train(max_epoch=10)
 
     except Exception as e:
         print(f"GPU {rank} encountered error: {e}")
