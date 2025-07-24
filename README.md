@@ -1,1 +1,1 @@
-Distributed training has been implemented in this repository, but I haven't personally evaluated how it performs due to poor GPU conditions. I will improve this repository as I learn more about DDP.
+Distributed training has been implemented in this repository, but I haven't personally evaluated how it performs due to poor GPU conditions. I will improve this repository as I learn more about DDP. Structure of the model is not focused in this code. Main focus is on distributed learning.
