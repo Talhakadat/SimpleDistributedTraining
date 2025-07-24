@@ -1,1 +1,1 @@
-In this repo, distributed training was applied but ı personally did not train how it works because of unadequate gpu conditions. I am going to improve this repo as ı learn more about DDP.
+Distributed training has been implemented in this repository, but I haven't personally evaluated how it performs due to poor GPU conditions. I will improve this repository as I learn more about DDP.
