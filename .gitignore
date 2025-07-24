@@ -1,0 +1,46 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.so
+
+# Sanal ortam klasörü
+.venv/
+venv/
+ENV/
+env/
+*.env
+
+# VSCode veya JetBrains (PyCharm) gibi IDE ayarları
+.vscode/
+.idea/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# MacOS ve Linux metadata dosyaları
+.DS_Store
+Thumbs.db
+
+# Log ve geçici dosyalar
+*.log
+*.tmp
+*.bak
+
+# Cache dosyaları
+.cache/
+*.egg-info/
+dist/
+build/
+
+# PyInstaller build klasörleri
+*.spec
+
+# Unit test çıktıları
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+test-output/
+
+# pip cache
+pip-wheel-metadata/
